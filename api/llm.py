@@ -1,11 +1,12 @@
 import json
-from .constants import AI_MODEL
+
 from google import genai
 from django.conf import settings
 
+from .constants import AI_MODEL
 from .prompt_builder import PromptBuilder
 from .prompts import SYSTEM_PROMPT
-from .fallback import FallbackResponse
+
 
 class GeminiService:
 
@@ -35,28 +36,17 @@ class GeminiService:
             severity=severity,
         )
 
-        try:
-            response = self.client.models.generate_content(
-                model=AI_MODEL,
-                contents=SYSTEM_PROMPT + "\n\n" + prompt,
-            )
-            text = response.text.strip()
+        response = self.client.models.generate_content(
+            model=AI_MODEL,
+            contents=SYSTEM_PROMPT + "\n\n" + prompt,
+        )
 
-            text = (
-                text.replace("```json", "")
-                    .replace("```", "")
-                    .strip()
-            )
-            return json.loads(text)
-        except Exception as e:
-            print(e)
-            return FallbackResponse.get()
-            
+        text = response.text.strip()
 
-        try:
+        text = (
+            text.replace("```json", "")
+                .replace("```", "")
+                .strip()
+        )
 
-            return json.loads(text)
-
-        except Exception:
-
-            return FallbackResponse.get()
+        return json.loads(text)
